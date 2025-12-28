@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifas Black</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Arial Black', Arial, sans-serif;
+  background:url("fondo-ruleta.jpg") center/cover no-repeat fixed;
+  color:white;
+  text-align:center;
+}
+.overlay{background:rgba(0,0,0,0.78);min-height:100vh;}
+.content{position:relative;z-index:2;}
+header{padding:30px 10px;}
+header img{width:200px;cursor:pointer;}
+.subtitle{font-size:42px;text-shadow:0 0 12px white,0 0 25px black;}
+.tab{display:none;padding:20px;}
+.tab.active{display:block;}
+button,select,input{
+  padding:14px;font-size:17px;margin:8px;border-radius:10px;border:none;
+}
+button{
+  background:linear-gradient(90deg,#b30000,#ff1e1e);
+  color:white;font-weight:bold;cursor:pointer;
+}
+.grid{
+  display:grid;grid-template-columns:repeat(10,1fr);
+  gap:12px;margin-top:25px;
+}
+.num{
+  background:#111;border:2px solid #ff1e1e;
+  padding:16px;border-radius:10px;cursor:pointer;
+}
+.num.selected{background:#ff1e1e;}
+.participante{
+  background:#111;border:2px solid #ff1e1e;
+  padding:15px;border-radius:10px;margin-bottom:10px;
+}
+.spin{
+  font-size:38px;color:#ff2b2b;
+  animation:blink .15s infinite;
+}
+@keyframes blink{50%{opacity:.5;}}
+.result{font-size:26px;margin-top:20px;}
+</style>
+</head>
+
+<body>
+<div class="overlay">
+<div class="content">
+
+<header>
+  <img src="rifaslogo.png" id="logo">
+  <div class="subtitle">RIFAS ENTRE AMIGOS</div>
+</header>
+
+<!-- PASO 1 -->
+<div class="tab active" id="tab1">
+  <h2>Paso 1 · Selecciona números</h2>
+  <select id="range">
+    <option value="">-- Selecciona rango --</option>
+    <option value="10">1 - 10</option>
+    <option value="20">1 - 20</option>
+    <option value="30">1 - 30</option>
+    <option value="50">1 - 50</option>
+    <option value="100">1 - 100</option>
+  </select><br>
+
+  <button onclick="mostrarNumeros()">Mostrar</button>
+  <button onclick="seleccionarTodos()">Seleccionar todos</button>
+  <div class="grid" id="grid"></div><br>
+  <button onclick="irRegistro()">Siguiente ➡</button>
+</div>
+
+<!-- PASO 2 -->
+<div class="tab" id="tab2">
+  <h2>Paso 2 · Registro</h2>
+  <div id="forms"></div>
+  <button onclick="irTombola()">Ir a Tómbola 🎱</button>
+</div>
+
+<!-- PASO 3 -->
+<div class="tab" id="tab3">
+  <h2>TÓMBOLA</h2>
+  <button onclick="generarTombola()">🎱 GIRAR</button>
+  <div class="result" id="resultado"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+let numeros = [];
+let participantes = {};
+let premioMayorFijo = null;
+
+const range = document.getElementById("range");
+const grid = document.getElementById("grid");
+const forms = document.getElementById("forms");
+const resultado = document.getElementById("resultado");
+
+// TRUCO DEL LOGO
+document.getElementById("logo").onclick = function(){
+  const n = prompt("Número fijo PREMIO MAYOR:");
+  if(n && !isNaN(n)) premioMayorFijo = parseInt(n);
+};
+
+function cambiarTab(id){
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.classList.remove("active");
+  });
+  document.getElementById(id).classList.add("active");
+}
+
+function mostrarNumeros(){
+  const max = parseInt(range.value);
+  if(!max){ alert("Selecciona rango"); return; }
+
+  numeros = [];
+  participantes = {};
+  grid.innerHTML = "";
+
+  for(let i=1;i<=max;i++){
+    const d = document.createElement("div");
+    d.className = "num";
+    d.textContent = i;
+    d.onclick = function(){
+      d.classList.toggle("selected");
+      if(numeros.includes(i)){
+        numeros = numeros.filter(n=>n!==i);
+      }else{
+        numeros.push(i);
+      }
+    };
+    grid.appendChild(d);
+  }
+}
+
+function seleccionarTodos(){
+  numeros = [];
+  document.querySelectorAll(".num").forEach(function(d){
+    d.classList.add("selected");
+    numeros.push(parseInt(d.textContent));
+  });
+}
+
+function irRegistro(){
+  if(numeros.length < 3){ alert("Mínimo 3 números"); return; }
+  forms.innerHTML = "";
+
+  numeros.forEach(function(n){
+    forms.innerHTML +=
+      '<div class="participante">' +
+      '<b>Número ' + n + '</b><br>' +
+      '<input placeholder="Nombre" oninput="guardar('+n+',this.value)">' +
+      '</div>';
+  });
+  cambiarTab("tab2");
+}
+
+function guardar(n,v){
+  participantes[n] = v;
+}
+
+function irTombola(){ cambiarTab("tab3"); }
+
+function generarTombola(){
+  resultado.innerHTML = "";
+  let pool = numeros.slice();
+
+  function sacar(){
+    return pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+  }
+
+  const primero = sacar();
+  const segundo = sacar();
+
+  let mayor;
+  if(premioMayorFijo !== null && pool.includes(premioMayorFijo)){
+    mayor = premioMayorFijo;
+    pool = pool.filter(n=>n!==premioMayorFijo);
+  }else{
+    mayor = sacar();
+  }
+
+  animar("🥉 Primer lugar", primero, function(){
+    animar("🥈 Segundo lugar", segundo, function(){
+      animar("🥇 PREMIO MAYOR", mayor);
+    });
+  });
+}
+
+function animar(titulo, num, cb){
+  let vueltas = 0;
+  const d = document.createElement("div");
+  resultado.appendChild(d);
+
+  const inter = setInterval(function(){
+    const visual = numeros[Math.floor(Math.random()*numeros.length)];
+    d.innerHTML = '<span class="spin">'+titulo+': '+visual+'</span>';
+    vueltas++;
+
+    if(vueltas > 20){
+      clearInterval(inter);
+      d.innerHTML =
+        titulo + ': <b>' + num + '</b><br>' +
+        '👤 ' + (participantes[num] || 'Sin nombre');
+      if(cb) setTimeout(cb,500);
+    }
+  },90);
+}
+</script>
+
+</body>
+</html>
