@@ -6,100 +6,84 @@
 
 <style>
 body {
-  margin: 0;
-  font-family: 'Arial Black', Arial, sans-serif;
-  background: url("fondo-ruleta.jpg") center/cover no-repeat fixed;
-  color: white;
-  text-align: center;
+  margin:0;
+  font-family:'Arial Black', Arial, sans-serif;
+  background:url("fondo-ruleta.jpg") center/cover no-repeat fixed;
+  color:white;
+  text-align:center;
 }
-
 .overlay {
-  background: rgba(0,0,0,0.78);
-  min-height: 100vh;
-  padding-bottom: 40px;
+  background:rgba(0,0,0,0.78);
+  min-height:100vh;
 }
-
-header {
-  padding: 30px 10px;
-}
-
-header img {
-  width: 200px;
-  cursor: pointer;
-}
+header { padding:30px 10px; }
+header img { width:200px; cursor:pointer; }
 
 .subtitle {
-  margin-top: 15px;
-  font-size: 42px;
-  font-weight: bold;
-  color: #ffffff; /* ← CAMBIO ÚNICO */
-  text-shadow: 0 0 12px #ffffff, 0 0 25px black;
-  letter-spacing: 3px;
+  font-size:42px;
+  color:white;
+  text-shadow:0 0 12px white, 0 0 25px black;
+  letter-spacing:3px;
 }
 
-.container {
-  max-width: 850px;
-  margin: auto;
-  padding: 20px;
-}
+.tab { display:none; padding:20px; }
+.tab.active { display:block; }
 
-select, button {
-  padding: 14px;
-  font-size: 17px;
-  margin: 8px;
-  border-radius: 10px;
-  border: none;
+button, select, input {
+  padding:14px;
+  font-size:17px;
+  margin:8px;
+  border-radius:10px;
+  border:none;
 }
 
 button {
-  background: linear-gradient(90deg, #b30000, #ff1e1e);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 0 12px black;
+  background:linear-gradient(90deg,#b30000,#ff1e1e);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 0 12px black;
 }
-
-button:hover {
-  transform: scale(1.05);
-}
+button:hover { transform:scale(1.05); }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 12px;
-  margin-top: 25px;
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  gap:12px;
+  margin-top:25px;
 }
 
 .num {
-  background: #111;
-  border: 2px solid #ff1e1e;
-  padding: 16px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 18px;
+  background:#111;
+  border:2px solid #ff1e1e;
+  padding:16px;
+  border-radius:10px;
+  cursor:pointer;
 }
+.num.selected { background:#ff1e1e; }
 
-.num.selected {
-  background: #ff1e1e;
-}
-
-.result {
-  margin-top: 30px;
-  font-size: 26px;
-  line-height: 1.8;
-  text-shadow: 0 0 10px black;
+.participante {
+  background:#111;
+  border:2px solid #ff1e1e;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
 }
 
 .spin {
-  font-size: 38px;
-  font-weight: bold;
-  color: #ff2b2b;
-  text-shadow: 0 0 15px black;
-  animation: blink 0.15s infinite;
+  font-size:38px;
+  font-weight:bold;
+  color:#ff2b2b;
+  text-shadow:0 0 15px black;
+  animation:blink .15s infinite;
 }
 
-@keyframes blink {
-  50% { opacity: 0.5; }
+@keyframes blink { 50%{opacity:.5;} }
+
+.result {
+  font-size:26px;
+  margin-top:20px;
+  text-shadow:0 0 10px black;
 }
 </style>
 </head>
@@ -112,129 +96,133 @@ button:hover {
   <div class="subtitle">RIFAS ENTRE AMIGOS</div>
 </header>
 
-<div class="container">
+<!-- PASO 1 -->
+<div class="tab active" id="tab1">
+  <h2>Paso 1 · Selecciona números</h2>
 
-<h2>Selecciona el rango de la rifa</h2>
+  <select id="range">
+    <option value="">-- Selecciona rango --</option>
+    <option value="10">1 - 10</option>
+    <option value="20">1 - 20</option>
+    <option value="30">1 - 30</option>
+    <option value="50">1 - 50</option>
+    <option value="100">1 - 100</option>
+  </select><br>
 
-<select id="range">
-  <option value="">-- Selecciona --</option>
-  <option value="10">1 - 10</option>
-  <option value="20">1 - 20</option>
-  <option value="30">1 - 30</option>
-  <option value="40">1 - 40</option>
-  <option value="50">1 - 50</option>
-  <option value="60">1 - 60</option>
-  <option value="70">1 - 70</option>
-  <option value="80">1 - 80</option>
-  <option value="90">1 - 90</option>
-  <option value="100">1 - 100</option>
-</select>
+  <button onclick="mostrarNumeros()">Mostrar</button>
+  <button onclick="seleccionarTodos()">Seleccionar todos</button>
 
-<br>
-<button onclick="mostrarNumeros()">Mostrar números</button>
-<button onclick="seleccionarTodos()">Seleccionar todos</button>
-
-<div class="grid" id="grid"></div>
-
-<br>
-<button onclick="generarTombola()">🎱 Generar Tómbola</button>
-
-<div class="result" id="resultado"></div>
-
+  <div class="grid" id="grid"></div><br>
+  <button onclick="irRegistro()">Siguiente ➡</button>
 </div>
+
+<!-- PASO 2 -->
+<div class="tab" id="tab2">
+  <h2>Paso 2 · Registro</h2>
+  <div id="forms"></div>
+  <button onclick="irTombola()">Ir a Tómbola 🎱</button>
+</div>
+
+<!-- PASO 3 -->
+<div class="tab" id="tab3">
+  <h2>TÓMBOLA</h2>
+  <button onclick="generarTombola()">🎱 GIRAR</button>
+  <div class="result" id="resultado"></div>
+</div>
+
 </div>
 
 <script>
-let numeros = [];
-let premioMayorFijo = null;
+let numeros=[], participantes={}, premioMayorFijo=null;
 
-// TRUCO OCULTO
-document.getElementById("logo").addEventListener("click", () => {
-  const n = prompt("Número ganador del PREMIO MAYOR:");
-  if (n && !isNaN(n) && n > 0) premioMayorFijo = parseInt(n);
-});
+document.getElementById("logo").onclick=()=>{
+  const n=prompt("Número fijo premio mayor:");
+  if(n && !isNaN(n)) premioMayorFijo=parseInt(n);
+};
 
-function mostrarNumeros() {
-  const max = parseInt(document.getElementById("range").value);
-  if (!max) return alert("Selecciona un rango");
+function cambiarTab(id){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-  numeros = [];
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
-  for (let i = 1; i <= max; i++) {
-    const div = document.createElement("div");
-    div.className = "num";
-    div.textContent = i;
-    div.onclick = () => {
-      div.classList.toggle("selected");
-      numeros.includes(i)
-        ? numeros = numeros.filter(n => n !== i)
-        : numeros.push(i);
+function mostrarNumeros(){
+  const max=parseInt(range.value);
+  if(!max) return alert("Selecciona rango");
+  numeros=[]; participantes={}; grid.innerHTML="";
+  for(let i=1;i<=max;i++){
+    const d=document.createElement("div");
+    d.className="num"; d.textContent=i;
+    d.onclick=()=>{ d.classList.toggle("selected");
+      numeros.includes(i)?numeros=numeros.filter(n=>n!==i):numeros.push(i);
     };
-    grid.appendChild(div);
+    grid.appendChild(d);
   }
 }
 
-function seleccionarTodos() {
-  numeros = [];
-  document.querySelectorAll(".num").forEach(d => {
+function seleccionarTodos(){
+  numeros=[];
+  document.querySelectorAll(".num").forEach(d=>{
     d.classList.add("selected");
     numeros.push(parseInt(d.textContent));
   });
 }
 
-function generarTombola() {
-  if (numeros.length < 3) {
-    alert("Selecciona al menos 3 números");
-    return;
-  }
-
-  const res = document.getElementById("resultado");
-  res.innerHTML = "";
-
-  let pool = [...numeros];
-
-  const primero = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
-  const segundo = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
-
-  let premioMayor;
-  if (premioMayorFijo !== null && pool.includes(premioMayorFijo)) {
-    premioMayor = premioMayorFijo;
-  } else {
-    premioMayor = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
-  }
-
-  function animar(texto, valor, callback) {
-    let vueltas = 0;
-    const linea = document.createElement("div");
-    res.appendChild(linea);
-
-    const intervalo = setInterval(() => {
-      linea.innerHTML = `<span class="spin">${texto}: ${pool[Math.floor(Math.random() * pool.length)]}</span>`;
-      vueltas++;
-
-      if (vueltas > 18) {
-        clearInterval(intervalo);
-        linea.innerHTML = `${texto}: <b>${valor}</b>`;
-        callback && callback();
-      }
-    }, 90);
-  }
-
-  animar("🥉 Primer número ganador", primero, () => {
-    setTimeout(() => {
-      animar("🥈 Segundo número ganador", segundo, () => {
-        setTimeout(() => {
-          animar("🥇 Premio mayor", premioMayor, () => {
-            res.innerHTML += `<br>🎉 Felicidades a los números ganadores`;
-          });
-        }, 500);
-      });
-    }, 500);
+function irRegistro(){
+  if(numeros.length<3) return alert("Mínimo 3 números");
+  forms.innerHTML="";
+  numeros.forEach(n=>{
+    forms.innerHTML+=`
+      <div class="participante">
+        <b>Número ${n}</b><br>
+        <input placeholder="Nombre" oninput="guardar(${n},'nombre',this.value)">
+        <input placeholder="Teléfono" oninput="guardar(${n},'tel',this.value)">
+      </div>`;
   });
+  cambiarTab("tab2");
+}
+
+function guardar(n,c,v){
+  if(!participantes[n]) participantes[n]={};
+  participantes[n][c]=v;
+}
+
+function irTombola(){
+  cambiarTab("tab3");
+}
+
+function generarTombola(){
+  resultado.innerHTML="";
+  let pool=[...numeros];
+
+  const sacar=()=>pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+
+  const primero=sacar();
+  const segundo=sacar();
+  const mayor=premioMayorFijo && pool.includes(premioMayorFijo)?premioMayorFijo:sacar();
+
+  animar("🥉 Primer lugar",primero,()=>{
+    animar("🥈 Segundo lugar",segundo,()=>{
+      animar("🥇 PREMIO MAYOR",mayor);
+    });
+  });
+}
+
+function animar(titulo,num,cb){
+  let vueltas=0;
+  const div=document.createElement("div");
+  resultado.appendChild(div);
+  const inter=setInterval(()=>{
+    div.innerHTML=⁠ <span class="spin">${titulo}: ${numeros[Math.floor(Math.random()*numeros.length)]}</span> ⁠;
+    vueltas++;
+    if(vueltas>20){
+      clearInterval(inter);
+      const p=participantes[num]||{};
+      div.innerHTML=⁠ ${titulo}: <b>${num}</b><br>👤 ${p.nombre||""}<br>📞 ${p.tel||""} ⁠;
+      cb&&setTimeout(cb,500);
+    }
+  },90);
 }
 </script>
 
 </body>
-</html>p
+</html>
