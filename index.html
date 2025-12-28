@@ -2,94 +2,56 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rifas Black</title>
 
 <style>
-body {
+body{
   margin:0;
   font-family:'Arial Black', Arial, sans-serif;
   background:url("fondo-ruleta.jpg") center/cover no-repeat fixed;
   color:white;
   text-align:center;
 }
-.overlay {
-  background:rgba(0,0,0,0.78);
-  min-height:100vh;
+.overlay{background:rgba(0,0,0,0.78);min-height:100vh;}
+.content{position:relative;z-index:2;}
+header{padding:30px 10px;}
+header img{width:200px;cursor:pointer;}
+.subtitle{font-size:42px;text-shadow:0 0 12px white,0 0 25px black;}
+.tab{display:none;padding:20px;}
+.tab.active{display:block;}
+button,select,input{
+  padding:14px;font-size:17px;margin:8px;border-radius:10px;border:none;
 }
-header { padding:30px 10px; }
-header img { width:200px; cursor:pointer; }
-
-.subtitle {
-  font-size:42px;
-  color:white;
-  text-shadow:0 0 12px white, 0 0 25px black;
-  letter-spacing:3px;
-}
-
-.tab { display:none; padding:20px; }
-.tab.active { display:block; }
-
-button, select, input {
-  padding:14px;
-  font-size:17px;
-  margin:8px;
-  border-radius:10px;
-  border:none;
-}
-
-button {
+button{
   background:linear-gradient(90deg,#b30000,#ff1e1e);
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 0 12px black;
+  color:white;font-weight:bold;cursor:pointer;
 }
-button:hover { transform:scale(1.05); }
-
-.grid {
-  display:grid;
-  grid-template-columns:repeat(10,1fr);
-  gap:12px;
-  margin-top:25px;
+.grid{
+  display:grid;grid-template-columns:repeat(10,1fr);
+  gap:12px;margin-top:25px;
 }
-
-.num {
-  background:#111;
-  border:2px solid #ff1e1e;
-  padding:16px;
-  border-radius:10px;
-  cursor:pointer;
+.num{
+  background:#111;border:2px solid #ff1e1e;
+  padding:16px;border-radius:10px;cursor:pointer;
 }
-.num.selected { background:#ff1e1e; }
-
-.participante {
-  background:#111;
-  border:2px solid #ff1e1e;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:10px;
+.num.selected{background:#ff1e1e;}
+.participante{
+  background:#111;border:2px solid #ff1e1e;
+  padding:15px;border-radius:10px;margin-bottom:10px;
 }
-
-.spin {
-  font-size:38px;
-  font-weight:bold;
-  color:#ff2b2b;
-  text-shadow:0 0 15px black;
+.spin{
+  font-size:38px;color:#ff2b2b;
   animation:blink .15s infinite;
 }
-
-@keyframes blink { 50%{opacity:.5;} }
-
-.result {
-  font-size:26px;
-  margin-top:20px;
-  text-shadow:0 0 10px black;
-}
+@keyframes blink{50%{opacity:.5;}}
+.result{font-size:26px;margin-top:20px;}
 </style>
 </head>
 
 <body>
 <div class="overlay">
+<div class="content">
 
 <header>
   <img src="rifaslogo.png" id="logo">
@@ -99,7 +61,6 @@ button:hover { transform:scale(1.05); }
 <!-- PASO 1 -->
 <div class="tab active" id="tab1">
   <h2>Paso 1 · Selecciona números</h2>
-
   <select id="range">
     <option value="">-- Selecciona rango --</option>
     <option value="10">1 - 10</option>
@@ -111,7 +72,6 @@ button:hover { transform:scale(1.05); }
 
   <button onclick="mostrarNumeros()">Mostrar</button>
   <button onclick="seleccionarTodos()">Seleccionar todos</button>
-
   <div class="grid" id="grid"></div><br>
   <button onclick="irRegistro()">Siguiente ➡</button>
 </div>
@@ -131,94 +91,125 @@ button:hover { transform:scale(1.05); }
 </div>
 
 </div>
+</div>
 
 <script>
-let numeros=[], participantes={}, premioMayorFijo=null;
+let numeros = [];
+let participantes = {};
+let premioMayorFijo = null;
 
-document.getElementById("logo").onclick=()=>{
-  const n=prompt("Número fijo premio mayor:");
-  if(n && !isNaN(n)) premioMayorFijo=parseInt(n);
+const range = document.getElementById("range");
+const grid = document.getElementById("grid");
+const forms = document.getElementById("forms");
+const resultado = document.getElementById("resultado");
+
+// TRUCO DEL LOGO
+document.getElementById("logo").onclick = function(){
+  const n = prompt("Número fijo PREMIO MAYOR:");
+  if(n && !isNaN(n)) premioMayorFijo = parseInt(n);
 };
 
 function cambiarTab(id){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.classList.remove("active");
+  });
   document.getElementById(id).classList.add("active");
 }
 
 function mostrarNumeros(){
-  const max=parseInt(range.value);
-  if(!max) return alert("Selecciona rango");
-  numeros=[]; participantes={}; grid.innerHTML="";
+  const max = parseInt(range.value);
+  if(!max){ alert("Selecciona rango"); return; }
+
+  numeros = [];
+  participantes = {};
+  grid.innerHTML = "";
+
   for(let i=1;i<=max;i++){
-    const d=document.createElement("div");
-    d.className="num"; d.textContent=i;
-    d.onclick=()=>{ d.classList.toggle("selected");
-      numeros.includes(i)?numeros=numeros.filter(n=>n!==i):numeros.push(i);
+    const d = document.createElement("div");
+    d.className = "num";
+    d.textContent = i;
+    d.onclick = function(){
+      d.classList.toggle("selected");
+      if(numeros.includes(i)){
+        numeros = numeros.filter(n=>n!==i);
+      }else{
+        numeros.push(i);
+      }
     };
     grid.appendChild(d);
   }
 }
 
 function seleccionarTodos(){
-  numeros=[];
-  document.querySelectorAll(".num").forEach(d=>{
+  numeros = [];
+  document.querySelectorAll(".num").forEach(function(d){
     d.classList.add("selected");
     numeros.push(parseInt(d.textContent));
   });
 }
 
 function irRegistro(){
-  if(numeros.length<3) return alert("Mínimo 3 números");
-  forms.innerHTML="";
-  numeros.forEach(n=>{
-    forms.innerHTML+=`
-      <div class="participante">
-        <b>Número ${n}</b><br>
-        <input placeholder="Nombre" oninput="guardar(${n},'nombre',this.value)">
-        <input placeholder="Teléfono" oninput="guardar(${n},'tel',this.value)">
-      </div>`;
+  if(numeros.length < 3){ alert("Mínimo 3 números"); return; }
+  forms.innerHTML = "";
+
+  numeros.forEach(function(n){
+    forms.innerHTML +=
+      '<div class="participante">' +
+      '<b>Número ' + n + '</b><br>' +
+      '<input placeholder="Nombre" oninput="guardar('+n+',this.value)">' +
+      '</div>';
   });
   cambiarTab("tab2");
 }
 
-function guardar(n,c,v){
-  if(!participantes[n]) participantes[n]={};
-  participantes[n][c]=v;
+function guardar(n,v){
+  participantes[n] = v;
 }
 
-function irTombola(){
-  cambiarTab("tab3");
-}
+function irTombola(){ cambiarTab("tab3"); }
 
 function generarTombola(){
-  resultado.innerHTML="";
-  let pool=[...numeros];
+  resultado.innerHTML = "";
+  let pool = numeros.slice();
 
-  const sacar=()=>pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+  function sacar(){
+    return pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+  }
 
-  const primero=sacar();
-  const segundo=sacar();
-  const mayor=premioMayorFijo && pool.includes(premioMayorFijo)?premioMayorFijo:sacar();
+  const primero = sacar();
+  const segundo = sacar();
 
-  animar("🥉 Primer lugar",primero,()=>{
-    animar("🥈 Segundo lugar",segundo,()=>{
-      animar("🥇 PREMIO MAYOR",mayor);
+  let mayor;
+  if(premioMayorFijo !== null && pool.includes(premioMayorFijo)){
+    mayor = premioMayorFijo;
+    pool = pool.filter(n=>n!==premioMayorFijo);
+  }else{
+    mayor = sacar();
+  }
+
+  animar("🥉 Primer lugar", primero, function(){
+    animar("🥈 Segundo lugar", segundo, function(){
+      animar("🥇 PREMIO MAYOR", mayor);
     });
   });
 }
 
-function animar(titulo,num,cb){
-  let vueltas=0;
-  const div=document.createElement("div");
-  resultado.appendChild(div);
-  const inter=setInterval(()=>{
-    div.innerHTML=⁠ <span class="spin">${titulo}: ${numeros[Math.floor(Math.random()*numeros.length)]}</span> ⁠;
+function animar(titulo, num, cb){
+  let vueltas = 0;
+  const d = document.createElement("div");
+  resultado.appendChild(d);
+
+  const inter = setInterval(function(){
+    const visual = numeros[Math.floor(Math.random()*numeros.length)];
+    d.innerHTML = '<span class="spin">'+titulo+': '+visual+'</span>';
     vueltas++;
-    if(vueltas>20){
+
+    if(vueltas > 20){
       clearInterval(inter);
-      const p=participantes[num]||{};
-      div.innerHTML=⁠ ${titulo}: <b>${num}</b><br>👤 ${p.nombre||""}<br>📞 ${p.tel||""} ⁠;
-      cb&&setTimeout(cb,500);
+      d.innerHTML =
+        titulo + ': <b>' + num + '</b><br>' +
+        '👤 ' + (participantes[num] || 'Sin nombre');
+      if(cb) setTimeout(cb,500);
     }
   },90);
 }
